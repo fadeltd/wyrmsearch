@@ -8,8 +8,17 @@ import Search, { handleSearch } from "./search/Search";
 const DISPLAYED_CARDS_INCREMENT = 30;
 
 function App() {
+  const allCardsById = useMemo(() => {
+    const lookup = {};
+    cards.forEach(card => {
+      lookup[card.id] = card;
+    });
+    return lookup;
+  }, []);
+
   const [cardState, triggerSearch] = useReducer(handleSearch, {
     allCards: cards,
+    allCardsById: allCardsById,
     filteredCardIds: cards.map((card) => card.id),
   });
 
@@ -36,7 +45,7 @@ function App() {
       >
         <div className="cards-container">
           {displayedCardIds.map((id) => (
-            <Card key={id} data={cardState.allCards[id]} />
+            <Card key={id} data={cardState.allCardsById[id]} />
           ))}
         </div>
       </InfiniteScroll>

@@ -17,6 +17,7 @@ import Shy from "../assets/icons/Shy.svg";
 import Playful from "../assets/icons/Playful.svg";
 import Helpful from "../assets/icons/Helpful.svg";
 import Aggressive from "../assets/icons/Aggressive.svg";
+import cards from "../assets/cards.json";
 
 const cardIndex = FlexSearch.Document({
   tokenize: "full",
@@ -26,11 +27,9 @@ const cardIndex = FlexSearch.Document({
   },
 });
 
-import("../assets/cards.json").then((cards) => {
-  cards.default
-    .sort((a, b) => a.sort_id - b.sort_id)
-    .forEach((card) => cardIndex.add(card));
-});
+cards
+  .sort((a, b) => a.sort_id - b.sort_id)
+  .forEach((card) => cardIndex.add(card));
 
 const fields = [
   "type",
@@ -54,15 +53,15 @@ export function handleSearch(state, query) {
       ]
     : state.allCards.map((card) => card.id);
   const filteredIds = searchedIds.filter((id) => {
-    const card = state.allCards[id];
-    return query.type[card.type] && 
+    const card = state.allCardsById[id];
+    return query.type[card.type] &&
            (query.personality[card.personality] || card.type === "Cave") &&
            query.expansion[card.expansion];
   });
 
   return { ...state, filteredCardIds: filteredIds.sort((a, b) => {
-    const cardA = state.allCards[a];
-    const cardB = state.allCards[b];
+    const cardA = state.allCardsById[a];
+    const cardB = state.allCardsById[b];
     return cardA.sort_id - cardB.sort_id;
   }) };
 }
@@ -93,7 +92,7 @@ function Search({ cardState, triggerSearch }) {
 
   const stats = useMemo(() => {
     return cardState.filteredCardIds
-      .map((id) => cardState.allCards[id])
+      .map((id) => cardState.allCardsById[id])
       .reduce(
         (acc, card) => {
           fields.forEach((field) => {
